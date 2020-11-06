@@ -1,0 +1,57 @@
+<!--/*
+  index.html
+  SchoolFile
+
+  Created by Arpit Singh on 05/11/20.
+  
+*/-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous"></script>
+<!--    <link rel="stylesheet" href="style.css">-->
+    <title>School Pojects</title>
+</head>
+<body>
+  <div id="contentID">
+    <div style="margin: 20px 20px">
+      <div class="form-group">
+        <label for="exampleInputEmail1">Phone Number</label>
+        <input type="email" class="form-control" id="phoneNumber" type="text" pattern="\+[0-9\s\-\(\)]+"  aria-describedby="emailHelp">
+        <small id="emailHelp" class="form-text text-muted">Enter your phone number...</small>
+      </div>
+      <button type="submit" class="btn btn-primary " id="btn-sign">Send Code</button>
+    </div>
+    <div id="verifyingCodeSection"></div>
+        <!-- The core Firebase JS SDK is always required and must be listed first -->
+        <script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-app.js"></script>
+        <!-- Add Firebase products that you want to use -->
+        <script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-auth.js"></script>
+       <script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-database.js"></script>
+       <script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-storage.js"></script>
+
+        <script>
+          // Your web app's Firebase configuration
+          var firebaseConfig = {
+            apiKey: "AIzaSyAeDU0ZBqixzNsFRpPpmswC6d-X9GID0vQ",
+            authDomain: "schoolproject-924c6.firebaseapp.com",
+            databaseURL: "https://schoolproject-924c6.firebaseio.com",
+            projectId: "schoolproject-924c6",
+            storageBucket: "schoolproject-924c6.appspot.com",
+            messagingSenderId: "29615033338",
+            appId: "1:29615033338:web:5d15a082f8377939053243"
+          };
+          // Initialize Firebase
+          firebase.initializeApp(firebaseConfig);
+          firebase.auth().languageCode = 'En';
+          var database = firebase.database();
+          var storageRef = firebase.storage();
+        </script>
+    <script defer src="script.js"></script>
+</body>
+</html>

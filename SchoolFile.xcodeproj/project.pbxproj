@@ -15,6 +15,7 @@
 		8345744A2553E6200025CDEC /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 834574482553E6200025CDEC /* LaunchScreen.storyboard */; };
 		834574552553E6210025CDEC /* SchoolFileTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 834574542553E6210025CDEC /* SchoolFileTests.swift */; };
 		834574602553E6210025CDEC /* SchoolFileUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8345745F2553E6210025CDEC /* SchoolFileUITests.swift */; };
+		8345747D255422230025CDEC /* webCode in Resources */ = {isa = PBXBuildFile; fileRef = 8345747C255422230025CDEC /* webCode */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -49,6 +50,7 @@
 		8345745B2553E6210025CDEC /* SchoolFileUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SchoolFileUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		8345745F2553E6210025CDEC /* SchoolFileUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchoolFileUITests.swift; sourceTree = "<group>"; };
 		834574612553E6210025CDEC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		8345747C255422230025CDEC /* webCode */ = {isa = PBXFileReference; lastKnownFileType = folder; name = webCode; path = "Web Code/webCode"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -104,6 +106,7 @@
 				834574412553E61D0025CDEC /* ViewController.swift */,
 				834574432553E61D0025CDEC /* Main.storyboard */,
 				834574462553E6200025CDEC /* Assets.xcassets */,
+				8345747C255422230025CDEC /* webCode */,
 				834574482553E6200025CDEC /* LaunchScreen.storyboard */,
 				8345744B2553E6200025CDEC /* Info.plist */,
 			);
@@ -231,6 +234,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8345747D255422230025CDEC /* webCode in Resources */,
 				8345744A2553E6200025CDEC /* LaunchScreen.storyboard in Resources */,
 				834574472553E6200025CDEC /* Assets.xcassets in Resources */,
 				834574452553E61D0025CDEC /* Main.storyboard in Resources */,
