@@ -1,24 +1,29 @@
 window.onload = function() {
 //firebase.auth().settings.appVerificationDisabledForTesting = true;
 
-window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier("btn-sign", {
-      'size': 'invisible',
-      'callback': function(response) {
-        window.alert(response)
-        // reCAPTCHA solved, allow signInWithPhoneNumber.
-       onSignInSubmit()
-      }
-    });
-
-recaptchaVerifier.render().then(function(widgetId) {
+ bindingProperty()
+ recaptchaVerifier.render().then(function(widgetId) {
       window.recaptchaWidgetId = widgetId;
       updateSignInButtonUI();
     });
-
-    document.getElementById("btn-sign").addEventListener("click",onSignInSubmit);
-    document.getElementById('phoneNumber').addEventListener('change', updateSignInButtonUI);
-    document.getElementById('phoneNumber').addEventListener('keyup', updateSignInButtonUI);
 };
+
+function bindingProperty() {
+       window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier("btn-sign", {
+                     'size': 'invisible',
+                     'callback': function(response) {
+                       window.alert(response)
+                       // reCAPTCHA solved, allow signInWithPhoneNumber.
+                      onSignInSubmit()
+                     }
+                   });
+          document.getElementById("btn-sign").addEventListener("click",onSignInSubmit);
+          document.getElementById('phoneNumber').addEventListener('change', updateSignInButtonUI);
+          document.getElementById('phoneNumber').addEventListener('keyup', updateSignInButtonUI);
+          
+   }
+    
+
 
   function resetReCaptcha() {
     if (typeof grecaptcha !== 'undefined'
@@ -439,4 +444,6 @@ function onSignOutClick() {
       <button type="submit" class="btn btn-primary " id="btn-sign">Send Code</button>
     </div>
     <div id="verifyingCodeSection"></div>`
-  }
+     bindingProperty()
+   }
+
