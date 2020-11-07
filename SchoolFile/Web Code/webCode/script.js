@@ -1,10 +1,4 @@
 window.onload = function() {
-    firebase.auth().onAuthStateChanged(function(user) {
-      if (user) {
-        // User is signed in.
-        onSignOutClick()
-      }
-    });
 //firebase.auth().settings.appVerificationDisabledForTesting = true;
 
 window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier("btn-sign", {
@@ -145,9 +139,9 @@ function onSignInSubmit() {
     if (firebase.auth().currentUser != null){
         let uid = firebase.auth().currentUser.uid
         database.ref('users/' + uid).once('value').then(function(snapshot) {
+            window.webkit.messageHandlers.loading.postMessage("stop");
         if (snapshot.val() === null ||snapshot.val().name === "" || snapshot.val().profile_picture === "") {
-          setUpUsnameField();
-           window.webkit.messageHandlers.loading.postMessage("stop");
+           setUpUsnameField();
         } else {
           setUpFileListing(snapshot.val());
         }
