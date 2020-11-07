@@ -2,16 +2,10 @@ window.onload = function() {
     firebase.auth().onAuthStateChanged(function(user) {
       if (user) {
         // User is signed in.
-        var uid = user.uid;
-        var phoneNumber = user.phoneNumber;
-        var displayName = user.displayName;
-        
+        onSignOutClick()
       }
-   
-});
+    });
 //firebase.auth().settings.appVerificationDisabledForTesting = true;
-//
-
 
 window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier("btn-sign", {
       'size': 'invisible',
@@ -43,6 +37,7 @@ function onSignInSubmit() {
   if (isPhoneNumberValid()) {
       window.signingIn = true;
       updateSignInButtonUI();
+      window.webkit.messageHandlers.loading.postMessage("start");
       var phoneNumber = getPhoneNumberFromUserInput();
       var appVerifier = window.recaptchaVerifier;
       	      firebase.auth().signInWithPhoneNumber(phoneNumber, appVerifier)
@@ -53,12 +48,14 @@ function onSignInSubmit() {
             window.signingIn = false;
             updateSignInButtonUI();
               setUPVerificationFiled()
+               window.webkit.messageHandlers.loading.postMessage("stop");
           }).catch(function (error) {
             // Error; SMS not sent
             console.error('Error during signInWithPhoneNumber', error);
             window.alert('Error during signInWithPhoneNumber:\n\n'
                 + error.code + '\n\n' + error.message);
             window.signingIn = false;
+             window.webkit.messageHandlers.loading.postMessage("stop");
             updateSignInButtonUI();
           });
     }
@@ -69,6 +66,7 @@ function onSignInSubmit() {
    */
   function onVerifyCodeSubmit(e) {
     e.preventDefault();
+     window.webkit.messageHandlers.loading.postMessage("start");
     if (!!getCodeFromUserInput()) {
       window.verifyingCode = true;
       updateVerifyCodeButtonUI();
@@ -77,14 +75,17 @@ function onSignInSubmit() {
         // User signed in successfully.
         window.verifyingCode = false;
         window.confirmationResult = null;
+        window.webkit.messageHandlers.loading.postMessage("stop");
         setUserName()
       }).catch(function (error) {
         // User couldn't sign in (bad verification code?)
+         window.webkit.messageHandlers.loading.postMessage("stop");
         console.error('Error while checking the verification code', error);
         window.alert('Error while checking the verification code:\n\n'
             + error.code + '\n\n' + error.message);
         window.verifyingCode = false;
         updateSignInButtonUI();
+        
         updateVerifyCodeButtonUI();
       });
     }
@@ -109,18 +110,21 @@ function onSignInSubmit() {
   }  
 
   function isPhoneNumberValid() {
-    var pattern = /^\+[0-9\s\-\(\)]+$/;
     var phoneNumber = getPhoneNumberFromUserInput();
+    return patternVaildater(phoneNumber)
+  }
+
+  function patternVaildater(phoneNumber){
+     var pattern = /^\+[0-9\s\-\(\)]+$/;
     return phoneNumber.search(pattern) !== -1;
   }
 
-
   function getCodeFromUserInput() {
-    return document.getElementById('verification-code').value;
+     return document.getElementById('verification-code').value;
   }
 
   function getPhoneNumberFromUserInput() {
-    return document.getElementById('phoneNumber').value;
+     return document.getElementById('phoneNumber').value;
   }
 
   function updateVerifyCodeButtonUI() {
@@ -137,11 +141,13 @@ function onSignInSubmit() {
 
 
   function setUserName(){
+     window.webkit.messageHandlers.loading.postMessage("start");
     if (firebase.auth().currentUser != null){
         let uid = firebase.auth().currentUser.uid
         database.ref('users/' + uid).once('value').then(function(snapshot) {
-        if (snapshot.val() == null) {
+        if (snapshot.val() === null ||snapshot.val().name === "" || snapshot.val().profile_picture === "") {
           setUpUsnameField();
+           window.webkit.messageHandlers.loading.postMessage("stop");
         } else {
           setUpFileListing(snapshot.val());
         }
@@ -149,10 +155,33 @@ function onSignInSubmit() {
   }
 }
 
-function updateButtonUI(state){
- document.getElementById("inputGroupFileAddon01").disabled = state
+//// profile Set UP Section
+
+function setUpUsnameField() {
+ document.getElementById("contentID").innerHTML = `
+    <div style="margin: 20px 20px">
+      <div class="form-group">
+       <input type="file" class="form-control" accept="image/*" name="image" id="file"  onchange="loadFile(event)" style="display: none;">
+        <label for="file" style="cursor: pointer;">Upload Image</label>
+        <img class="rounded-circle" id="output" width="200" height="200"/>
+        <label for="exampleInputEmail1" style="margin-top: 10px;">User Name</label>
+        <input type="email" class="form-control" id="Name" type="text" aria-describedby="emailHelp">
+        <small id="emailHelp" class="form-text text-muted">Enter your full Name</small>
+      </div>
+      <button type="submit" class="btn btn-primary " id="updateProfile">Set Up profile</button>
+    </div>
+ `;
+ document.getElementById("updateProfile").addEventListener("click",saveUserData);
 }
 
+function updateButtonUI(state){
+ document.getElementById("updateProfile").disabled = state
+}
+
+function loadFile(event) {
+	var image = document.getElementById('output');
+	image.src = URL.createObjectURL(event.target.files[0]);
+};
 
 function writeUserData(userId, name, phone, imageUrl) {
   updateButtonUI(true)
@@ -161,6 +190,7 @@ function writeUserData(userId, name, phone, imageUrl) {
     phone: phone,
     profile_picture : imageUrl
   },function(error) {
+     window.webkit.messageHandlers.loading.postMessage("stop");
     if (error) {
       window.alert(error)
       // The write failed...
@@ -172,41 +202,45 @@ function writeUserData(userId, name, phone, imageUrl) {
   });
 }
 
-function setUpUsnameField() {
- document.getElementById("contentID").innerHTML = `
-    <div style="margin: 20px 20px">
-      <div class="form-group">
-        <label for="exampleInputEmail1">User Name</label>
-        <input type="email" class="form-control" id="Name" type="text" aria-describedby="emailHelp">
-        <small id="emailHelp" class="form-text text-muted">Enter your full Name</small>
-      </div>
-      <button type="submit" class="btn btn-primary " id="updateProfile">Set Up profile</button>
-    </div>
- `;
- document.getElementById("updateProfile").addEventListener("click",saveUserData);
-}
-
 function saveUserData(){
    let filedName = document.getElementById('Name').value; 
    let user = firebase.auth().currentUser
-   console.log(user)
-   writeUserData(user.uid,filedName,user.phoneNumber,"")
+   let file = getFile()
+   let metaType = { contentType: file.type }
+   window.webkit.messageHandlers.loading.postMessage("start");
+   storageRef.ref().child(`userProfile/${user.uid}`).put(file,metaType).then(function(snapshot){
+        snapshot.ref.getDownloadURL().then(function(downloadURL) {
+         writeUserData(user.uid,filedName,user.phoneNumber,downloadURL)
+      });
+   },function(error){
+     window.alert(error)
+   }); 
 }
 
 
 function setUpFileListing(userData) {
+   window.webkit.messageHandlers.loading.postMessage("start");
    setUpProfileHeader(userData)
 }
 
+
+/// File Listing section
 
 function setUpProfileHeader(data){
    document.getElementById("contentID").innerHTML = `
    <div class="card" style="max-width: 100%; margin: 20px 20px;">
    <div class="card-body">
+   <div class="row">
+    <div class="col">
+    <img src="${data.profile_picture}" class="rounded-circle" width="85" height="85"/>
+    </div>
+    <div class="col">
     <h5 class="card-title">${data.Name}</h5>
     <p class="card-text"> phone Number: ${data.phone}</p>
-  </div>
-</div>
+    </div>
+    </div>
+    </div>
+    </div>
 <div class="input-group mb-3" style="max-width: 87%; margin: 20px 20px;">
   <div class="input-group-prepend">
     <span class="input-group-text" id="inputGroupFileAddon01">Upload</span>
@@ -216,7 +250,7 @@ function setUpProfileHeader(data){
     <label class="custom-file-label" for="inputGroupFile01">Choose file</label>
   </div>
  </div>
-  <label id="progress" class="text-centre"></label>
+  <label id="progress" style="text-align: center;"></label>
   <div class='row'>
   <div class='col'>
   <div class="input-group-prepend" style="max-width: 97%; margin: 20px 20px;">
@@ -224,7 +258,7 @@ function setUpProfileHeader(data){
     <label for="Input" style="padding-top: 8px;padding-right: 12px;max-width: 100%;"> Type   </label>
     <select class="custom-select" id="Type" aria-label="Example select with button addon">
     <option selected value="private">Private</option>
-    <option value="public">public</option>
+    <option value="public">Public</option>
     </select>
     </div>
   </div>
@@ -236,12 +270,15 @@ function setUpProfileHeader(data){
   <div id="list" style="padding: 21px;">
   <div class="list-group" id="Public" style="margin-bottom: 10px;"></div>
   <div class="list-group" id="Private" style="margin-bottom: 10px;"></div> 
+  <div class="list-group" id="Shared" style="margin-bottom: 10px;"></div> 
   </div>
    `
    document.getElementById("inputGroupFileAddon01").addEventListener("click",UploadAction)
    let uid = firebase.auth().currentUser.uid
    listData('Public','public')
    listData('Private','private/'+ uid)
+   listData('Shared','shared/'+ uid)
+   window.webkit.messageHandlers.loading.postMessage("stop");
 }
 
 function getFile(){
@@ -297,7 +334,6 @@ function saveFileDatainBase(fileName,url){
        setUserName()
       // Data saved successfully!
     }
-      updateButtonUI(false)
   });
    
 }
@@ -307,19 +343,95 @@ function listData(type,path){
  list.appendChild(listItem("#",type,"active"))
   var commentsRef = firebase.database().ref().child(path);
   commentsRef.on('child_added', function(data) {
-         list.appendChild(listItem(data.val().url,data.val().name,""))  
-  },function(error){
+          if (type !== "Public") {
+            list.appendChild(listItemPrivate(data.val().url,data.val().name)) 
+          } else {      
+          list.appendChild(listItem(data.val().url,data.val().name,""))  
+        }
+       },function(error){
      window.alert(error)
    }); 
 }
 
 function listItem(link,text,isactive){
-   var a = document.createElement("a");
+   var a = document.createElement("li");
+   a.style = 'display: grid;'
    a.className = "list-group-item list-group-item-action " + isactive
    a.innerHTML = text
-   a.setAttribute('href',link)
+  if (isactive === ""){
+   let data = {link,text};
+   a.appendChild(addActionButton("btn-secondary","Open",`openAction(${JSON.stringify(data)})`))
+  }
    return a
 }
+
+function listItemPrivate(link,text){
+   var a = document.createElement("li");
+   a.style = 'display: grid;'
+   a.className = "list-group-item"
+   a.innerHTML = text
+   let data = {link,text};
+   a.appendChild(addActionButton("btn-secondary","Open",`openAction(${JSON.stringify(data)})`))
+   a.appendChild(addActionButton("btn-info",'Share',`shareAction(${JSON.stringify(data)})`)) 
+   return a
+}
+
+function addActionButton(className,title,Action){
+  let button = document.createElement("button");
+  button.style = "margin-top: 10px;";
+  button.className = `btn ${className}`;
+  button.innerHTML = title;
+  button.setAttribute('onClick',Action);
+  return button
+}
+
+  function shareAction(file){
+    let phoneNumber = window.prompt("enter the phone Number to who you want to share file with");
+       let userNumber = firebase.auth().currentUser.phoneNumber
+    if (patternVaildater(phoneNumber)){
+        if (phoneNumber !== userNumber ) {
+       var Ref = firebase.database().ref().child('users');
+        window.webkit.messageHandlers.loading.postMessage("start");
+           Ref.orderByChild('phone').equalTo(phoneNumber).on('value', function(snapshot) {
+              window.webkit.messageHandlers.loading.postMessage("stop");
+             snapshot.forEach(function(data) {
+              sendFileTo(data.key,file)
+            });
+         },function(error) {
+          window.alert(error)
+         })
+        } else {
+            window.alert("its your number")
+        }
+    } else {
+      window.alert("invalid Number entered");
+    }
+  }
+
+function sendFileTo(user,file){
+ let ref = database.ref().child("shared/" + user)
+  window.webkit.messageHandlers.loading.postMessage("start");
+ let key = ref.push().key
+   ref.child(key).set({
+    name: file.text,
+    url: file.link,
+    created : Date.now()
+  },function(error) {
+    if (error) {
+      window.alert(error)
+      // The write failed...
+    } else {
+   
+      // Data saved successfully!
+    }
+     window.webkit.messageHandlers.loading.postMessage("stop");
+  });
+}
+
+function openAction(data){
+    window.alert(data.text + " \ndownload: "+data.link)
+    window.webkit.messageHandlers.openFile.postMessage(`${data.link}`);
+  }
 
 function onSignOutClick() {
     firebase.auth().signOut();
